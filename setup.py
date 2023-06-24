@@ -24,7 +24,7 @@ with open(os.path.join(os.path.dirname(__file__),
 
 
 setup(
-    name='Frozen-Flask',
+    name='flask-frozen',
     version=VERSION,
     url='https://github.com/Frozen-Flask/Frozen-Flask',
     license='BSD',

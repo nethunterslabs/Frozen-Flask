@@ -116,6 +116,7 @@ class Freezer(object):
             app.config.setdefault('FREEZER_DESTINATION_IGNORE', [])
             app.config.setdefault('FREEZER_STATIC_IGNORE', [])
             app.config.setdefault('FREEZER_BASE_URL', None)
+            app.config.setdefault('FREEZER_SUBDOMAIN', None)
             app.config.setdefault('FREEZER_REMOVE_EXTRA_FILES', True)
             app.config.setdefault('FREEZER_DEFAULT_MIMETYPE',
                                   'application/octet-stream')
@@ -224,16 +225,24 @@ class Freezer(object):
         base_url = self.app.config['FREEZER_BASE_URL']
         return urlsplit(base_url or '').path.rstrip('/')
 
+    def _subdomain(self):
+        """
+        Return the subdomain from FREEZER_SUBDOMAIN, without trailing dot.
+        """
+        subdomain = self.app.config['FREEZER_SUBDOMAIN']
+        return (subdomain or '').rstrip('.') or None
+
     def _generate_all_urls(self):
         """
         Run all generators and yield (url, endpoint) tuples.
         """
         script_name = self._script_name()
+        subdomain = self._subdomain()
         url_encoding = self.app.url_map.charset
         url_generators = list(self.url_generators)
         url_generators += [self.url_for_logger.iter_calls]
         # A request context is required to use url_for
-        with self.app.test_request_context(base_url=script_name or None):
+        with self.app.test_request_context(base_url=script_name or None, subdomain=subdomain):
             for generator in url_generators:
                 for generated in generator():
                     if isinstance(generated, basestring):
